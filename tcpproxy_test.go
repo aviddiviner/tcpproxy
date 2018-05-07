@@ -71,7 +71,7 @@ func TestMatchHTTPHost(t *testing.T) {
 		}
 		t.Run(name, func(t *testing.T) {
 			br := bufio.NewReader(tt.r)
-			r := httpHostMatch{equals(tt.host), noopTarget{}}
+			r := httpHostMatch{equals(tt.host, noopTarget{})}
 			got := r.match(br) != nil
 			if got != tt.want {
 				t.Fatalf("match = %v; want %v", got, tt.want)
@@ -450,7 +450,6 @@ func TestProxyACME(t *testing.T) {
 	p := testProxy(t, front)
 	p.AddSNIRoute(testFrontAddr, "foo.com", To(backFoo.Addr().String()))
 	p.AddSNIRoute(testFrontAddr, "bar.com", To(backBar.Addr().String()))
-	p.AddStopACMESearch(testFrontAddr)
 	p.AddSNIRoute(testFrontAddr, "quux.com", To(backQuux.Addr().String()))
 	if err := p.Start(); err != nil {
 		t.Fatal(err)
@@ -464,8 +463,8 @@ func TestProxyACME(t *testing.T) {
 		{"bar.com", "bar.com", true},
 		{"quux.com", "quux.com", true},
 		{"xyzzy.com", "", false},
-		{"foo.com.acme.invalid", "foo.com", true},
-		{"bar.com.acme.invalid", "bar.com", true},
+		{"foo.com.acme.invalid", "", false},
+		{"bar.com.acme.invalid", "", false},
 		{"quux.com.acme.invalid", "", false},
 	}
 	for _, test := range tests {

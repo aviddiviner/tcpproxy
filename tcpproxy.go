@@ -81,21 +81,23 @@ type Proxy struct {
 	ListenFunc func(net, laddr string) (net.Listener, error)
 }
 
-// Matcher reports whether hostname matches the Matcher's criteria.
-type Matcher func(ctx context.Context, hostname string) bool
+// Matcher checks whether a hostname matches its criteria and, if true, returns the
+// target where the incoming matched connection should be sent to.
+type Matcher func(ctx context.Context, hostname string) (ok bool, t Target)
 
-// equals is a trivial Matcher that implements string equality.
-func equals(want string) Matcher {
-	return func(_ context.Context, got string) bool {
-		return want == got
+// equals is a trivial Matcher that directs a matching host to a single target
+func equals(want string, target Target) Matcher {
+	return func(_ context.Context, got string) (bool, Target) {
+		if want == got {
+			return true, target
+		}
+		return false, nil
 	}
 }
 
 // config contains the proxying state for one listener.
 type config struct {
-	routes      []route
-	acmeTargets []Target // accumulates targets that should be probed for acme.
-	stopACME    bool     // if true, AddSNIRoute doesn't add targets to acmeTargets.
+	routes []route
 }
 
 // A route matches a connection to a target.
@@ -283,7 +285,7 @@ type Target interface {
 	HandleConn(net.Conn)
 }
 
-// To is shorthand way of writing &tlsproxy.DialProxy{Addr: addr}.
+// To is shorthand way of writing &tcpproxy.DialProxy{Addr: addr}.
 func To(addr string) *DialProxy {
 	return &DialProxy{Addr: addr}
 }
