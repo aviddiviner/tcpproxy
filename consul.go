@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/miekg/dns"
@@ -29,7 +28,7 @@ type dnsClient interface {
 //
 func ConsulMatcher(matchSuffix, consulDnsAddr string) Matcher {
 	m := consulMatcher{
-		matchSuffix:   "." + strings.TrimLeft(matchSuffix, "."),
+		matchSuffix:   newSuffixMatcher(matchSuffix, nil),
 		consulDnsAddr: consulDnsAddr,
 
 		udpClient: &dns.Client{Net: "udp"},
@@ -40,7 +39,7 @@ func ConsulMatcher(matchSuffix, consulDnsAddr string) Matcher {
 }
 
 type consulMatcher struct {
-	matchSuffix   string
+	matchSuffix   *suffixMatcher
 	consulDnsAddr string
 
 	udpClient dnsClient
@@ -49,7 +48,7 @@ type consulMatcher struct {
 }
 
 func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (ok bool, target Target) {
-	ok, serviceName := m.match(ctx, hostname)
+	ok, serviceName := m.matchSuffix.hasSuffix(ctx, hostname)
 	if !ok {
 		return
 	}
@@ -60,17 +59,6 @@ func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (ok bool, t
 	}
 	target = To(addr) // TODO: Reuse targets
 	return
-}
-
-func (m *consulMatcher) match(_ context.Context, hostname string) (ok bool, service string) {
-	if strings.HasSuffix(hostname, m.matchSuffix) {
-		prefix := hostname[:len(hostname)-len(m.matchSuffix)]
-		if prefix == "" || strings.Contains(prefix, ".") {
-			return false, ""
-		}
-		return true, prefix
-	}
-	return false, ""
 }
 
 func (m *consulMatcher) dnsSrvQuery(ctx context.Context, fqdn string) (ans, extra []dns.RR, err error) {

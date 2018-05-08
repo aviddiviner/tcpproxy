@@ -77,7 +77,7 @@ func TestConsulMatcher(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			br := bufio.NewReader(tt.body)
 			m := consulMatcher{
-				matchSuffix: tt.suffix,
+				matchSuffix: newSuffixMatcher(tt.suffix, nil),
 				udpClient:   mockDnsClient{Answers: tt.answer, Extras: tt.extra},
 			}
 			r := httpHostMatch{m.Lookup}
