@@ -3,6 +3,7 @@ package tcpproxy
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -54,7 +55,8 @@ func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (ok bool, t
 	}
 	addr, err := m.lookupDns(ctx, serviceName)
 	if err != nil {
-		return false, nil // TODO: Do something smarter on error
+		log.Printf("tcpproxy: consul lookup failed: %s", err)
+		return false, nil
 	}
 	target = To(addr) // TODO: Reuse targets
 	return

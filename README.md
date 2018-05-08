@@ -1,5 +1,5 @@
 # tcpproxy
 
-For library usage, see https://godoc.org/github.com/google/tcpproxy/
+This is a fork of https://github.com/google/tcpproxy/
 
-For CLI usage, see https://github.com/google/tcpproxy/blob/master/cmd/tlsrouter/README.md
+For library usage, see https://godoc.org/github.com/aviddiviner/tcpproxy/
