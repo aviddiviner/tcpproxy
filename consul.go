@@ -82,7 +82,7 @@ func (m *consulMatcher) dnsSrvQuery(ctx context.Context, fqdn string) (ans, extr
 		return r.Answer, r.Extra, nil // success
 
 	case dns.RcodeNameError:
-		err = fmt.Errorf("non-existent domain: %s\n%s", fqdn, r)
+		err = fmt.Errorf("non-existent name: %s", fqdn)
 		return
 	}
 	err = fmt.Errorf("lookup failed for: %s\n%s", fqdn, r)

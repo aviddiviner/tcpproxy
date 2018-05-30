@@ -121,3 +121,20 @@ func untilEOL(v []byte) []byte {
 	}
 	return v
 }
+
+// ServeHTTPRedirect adds a route (see AddHTTPHostRoute) that will direct all incoming requests for
+// the httpHost to some new targetUrl. The returned func will start serving the redirects. Use it like:
+//
+//   serve := p.ServeHTTPRedirect(":80", "my.domain", "https://my.domain", http.StatusMovedPermanently)
+//   go serve()
+//
+func (p *Proxy) ServeHTTPRedirect(ipPort, httpHost, targetUrl string, httpStatusCode int) func() error {
+	redirect := &TargetListener{Address: httpHost}
+	p.AddHTTPHostRoute(ipPort, httpHost, redirect)
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, targetUrl, httpStatusCode)
+	}
+	return func() error {
+		return http.Serve(redirect, http.HandlerFunc(handler))
+	}
+}
