@@ -48,7 +48,7 @@ type sniMatch struct {
 }
 
 func (m sniMatch) match(br *bufio.Reader) Target {
-	if ok, target := m.matcher(context.TODO(), clientHelloServerName(br)); ok {
+	if target, ok := m.matcher(context.TODO(), clientHelloServerName(br)); ok {
 		return target
 	}
 	return nil

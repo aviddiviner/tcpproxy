@@ -83,15 +83,15 @@ type Proxy struct {
 
 // Matcher checks whether a hostname matches its criteria and, if true, returns the
 // target where the incoming matched connection should be sent to.
-type Matcher func(ctx context.Context, hostname string) (ok bool, t Target)
+type Matcher func(ctx context.Context, hostname string) (t Target, ok bool)
 
 // equals is a trivial Matcher that directs a matching host to a single target
 func equals(want string, target Target) Matcher {
-	return func(_ context.Context, got string) (bool, Target) {
+	return func(_ context.Context, got string) (Target, bool) {
 		if want == got {
-			return true, target
+			return target, true
 		}
-		return false, nil
+		return nil, false
 	}
 }
 

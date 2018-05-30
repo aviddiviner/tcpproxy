@@ -20,12 +20,12 @@ type suffixMatcher struct {
 	target Target
 }
 
-func (m *suffixMatcher) Lookup(ctx context.Context, hostname string) (bool, Target) {
+func (m *suffixMatcher) Lookup(ctx context.Context, hostname string) (Target, bool) {
 	ok, _ := m.hasSuffix(ctx, hostname)
 	if ok {
-		return true, m.target
+		return m.target, true
 	}
-	return false, nil
+	return nil, false
 }
 
 func (m *suffixMatcher) hasSuffix(_ context.Context, hostname string) (bool, string) {

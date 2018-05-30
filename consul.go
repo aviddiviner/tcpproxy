@@ -47,7 +47,7 @@ type consulMatcher struct {
 	//targets   map[string]*DialProxy
 }
 
-func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (ok bool, target Target) {
+func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (target Target, ok bool) {
 	ok, serviceName := m.matchSuffix.hasSuffix(ctx, hostname)
 	if !ok {
 		return
@@ -55,7 +55,7 @@ func (m *consulMatcher) Lookup(ctx context.Context, hostname string) (ok bool, t
 	addr, err := m.lookupDns(ctx, serviceName)
 	if err != nil {
 		log.Printf("tcpproxy: consul lookup failed: %s", err)
-		return false, nil
+		return nil, false
 	}
 	target = To(addr) // TODO: Reuse targets
 	return

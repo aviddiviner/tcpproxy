@@ -46,7 +46,7 @@ type httpHostMatch struct {
 }
 
 func (m httpHostMatch) match(br *bufio.Reader) Target {
-	if ok, target := m.matcher(context.TODO(), httpHostHeader(br)); ok {
+	if target, ok := m.matcher(context.TODO(), httpHostHeader(br)); ok {
 		return target
 	}
 	return nil
